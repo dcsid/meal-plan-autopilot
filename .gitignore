@@ -5,3 +5,8 @@ __pycache__/
 .DS_Store
 .env
 instance/
+
+.coverage
+*.crx
+*.pem
+chrome-fact-checker-webstore.zip
