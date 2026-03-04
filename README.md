@@ -1,105 +1,106 @@
-# AI Tutoring Analytics Platform
+# Meal Plan Autopilot
 
-Flask-based analytics system for tutoring centers that ingest assessment data, auto-label questions, compute student performance insights, generate weekly reports, and send parent emails.
+Pantry-aware, macro-constrained weekly meal planning for normal people.
 
-## What is included
+This is a web app (Flask backend + browser UI), built to be easy for interviewers to open and click through.
 
-- Scantron upload pipeline (CSV/XLSX, long and wide formats)
-- Question metadata upload and version-aware updates
-- AI-assisted topic/difficulty labeling with GPT and heuristic fallback
-- Student and class analytics engine (topic, difficulty, trends, percentile)
-- Branded weekly HTML report generation with charts
-- Parent email delivery and email logs
-- Admin dashboard + API endpoints
-- Weekly automation entrypoint (`scripts/weekly_job.py`)
+## What it does
 
-## Quick start
+- Pantry CRUD with quantity + unit conversion to grams
+- Diet tags, allergens, and dislikes constraints
+- Daily calorie + protein/carbs/fat target ranges
+- Weekly greedy planner with explainable scoring
+- Shopping list of only missing ingredients
+- USDA FoodData Central lookup with local cache (falls back to `DEMO_KEY` if key is blank)
+- Medications & supplements workspace using FDA openFDA label data for interaction signals and diet/nutrient effect mentions (informational-only framing)
+- Seeded local foods + recipes for offline/demo use
 
-1. Create virtual environment and install dependencies:
+## Stack
+
+- Flask + Flask-SQLAlchemy
+- SQLite (or Postgres via `DATABASE_URL`)
+- Vanilla HTML/CSS/JS UI
+- Gunicorn for production serving
+- Includes `psycopg2-binary` so `postgresql://...` URLs work out of the box
+
+## Run locally
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-2. Configure environment:
-
-```bash
 cp .env.example .env
-```
-
-3. Run the app:
-
-```bash
 python run.py
 ```
 
-4. Useful endpoints:
+Open [http://localhost:5000](http://localhost:5000).
 
-- `POST /api/upload/scantron`
-- `POST /api/upload/questions`
-- `POST /api/upload/parents`
-- `POST /api/questions/label-missing`
-- `GET /api/students/<student_id>/analytics`
-- `GET /api/analytics/class-overview`
-- `POST /api/reports/student/<student_id>`
-- `POST /api/reports/weekly`
-- `GET /admin`
+## Interview-ready hosted format (recommended)
 
-## Input formats
+Use a **public Render web service URL** so interviewers can click through immediately.
 
-### Scantron upload
+### Option A: Blueprint deploy (fastest)
 
-Long format columns:
+1. Push this repo to GitHub.
+2. In Render, choose **New + > Blueprint** and connect the repo.
+3. Render will read `/render.yaml` and create the service.
+4. Share the generated URL (no login required).
 
-- `student_id`
-- `test_code`
-- `question_number`
-- `is_correct`
-- optional `taken_on`
+### Option B: Manual Render deploy
 
-Wide format is also supported:
+1. Create a new **Web Service** from the repo.
+2. Set:
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --worker-tmp-dir /tmp`
+3. Add env vars:
+   - `SECRET_KEY` (random)
+   - `DATABASE_URL=sqlite:////tmp/meal_autopilot.db`
+   - `AUTO_CREATE_TABLES=true`
+   - `AUTO_SEED_DATA=true`
+   - `AUTO_SEED_DEMO_PANTRY=true`
+   - `USDA_API_KEY` (optional)
 
-- `student_id`
-- optional `test_code`
-- `Q1..Qn` (or `1..n`) where values are `1/0`, `true/false`, `correct/incorrect`
+## Why this is low-friction for interviewers
 
-### Question metadata upload
+- Public URL, no setup/downloads
+- Health endpoint: `GET /healthz`
+- Demo pantry can auto-seed on boot (`AUTO_SEED_DEMO_PANTRY=true`), so plan generation works immediately
+- Existing API + UI are in one deployment
 
-- `test_code`
-- `question_number`
-- `question_text`
-- optional `topic`
-- optional `difficulty` (1-5 or Easy/Medium/Hard)
-- optional `version`
-- optional `taken_on`
+## Core endpoints
 
-### Parent contacts upload
+- `GET /`
+- `GET /healthz`
+- `GET /api/bootstrap`
+- `GET /api/foods/search?q=<term>&limit=<1..50>`
+- `POST /api/interactions/check`
+- `GET /api/pantry`
+- `POST /api/pantry`
+- `PUT /api/pantry/<id>`
+- `DELETE /api/pantry/<id>`
+- `GET /api/preferences`
+- `PUT /api/preferences`
+- `GET /api/macro-target`
+- `PUT /api/macro-target`
+- `GET /api/recipes`
+- `POST /api/meal-plan/generate`
 
-- `student_id`
-- `parent_email`
-- optional `parent_name`
-- optional `is_primary`
-
-## Weekly automation
-
-Use Flask CLI:
-
-```bash
-flask --app run.py run-weekly
-```
-
-or:
+## Tests
 
 ```bash
-python scripts/weekly_job.py
+source .venv/bin/activate
+PYTHONPYCACHEPREFIX=/tmp/pycache pytest -q
 ```
 
-Reports are written to `REPORT_OUTPUT_DIR` (default: `reports/`).
+Current suite covers endpoint contracts, validation paths, planner behavior, lookup service behavior, seed idempotency, and UI route integrity.
 
-## Notes
+## Chrome Extension Prototype
 
-- GPT labeling is optional and controlled by `ENABLE_GPT_LABELING` + `OPENAI_API_KEY`.
-- If SMTP is not configured, report email attempts are logged as `skipped`.
-- This scaffold is production-minded but intentionally lightweight; see `docs/feature_mapping.md` for module mapping.
+This repo also includes a standalone Chrome extension at `chrome-fact-checker/`:
+
+- deterministic, non-AI fact checker
+- weighted source confidence model
+- context categorization
+- full citation report page with decision trace
+
+Load it in Chrome via `chrome://extensions` -> **Load unpacked** -> select `chrome-fact-checker/`.

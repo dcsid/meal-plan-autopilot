@@ -1,9 +1,9 @@
-from pathlib import Path
-
 from flask import Flask
 
 from .config import Config
 from .extensions import db
+from .services.demo_data import ensure_demo_pantry
+from .services.seed_data import ensure_seed_data
 
 
 def create_app(config_class=Config) -> Flask:
@@ -18,22 +18,22 @@ def create_app(config_class=Config) -> Flask:
         if app.config.get("AUTO_CREATE_TABLES", True):
             db.create_all()
 
+        if app.config.get("AUTO_SEED_DATA", True):
+            ensure_seed_data(db.session)
+        if app.config.get("AUTO_SEED_DEMO_PANTRY", False):
+            ensure_demo_pantry(db.session)
+
     _register_blueprints(app)
     _register_cli(app)
-    _ensure_report_dir(app)
     return app
 
 
 def _register_blueprints(app: Flask) -> None:
-    from .routes.admin import admin_bp
-    from .routes.analytics import analytics_bp
-    from .routes.reports import reports_bp
-    from .routes.uploads import uploads_bp
+    from .routes.meal import meal_bp
+    from .routes.ui import ui_bp
 
-    app.register_blueprint(uploads_bp)
-    app.register_blueprint(analytics_bp)
-    app.register_blueprint(reports_bp)
-    app.register_blueprint(admin_bp)
+    app.register_blueprint(ui_bp)
+    app.register_blueprint(meal_bp)
 
 
 def _register_cli(app: Flask) -> None:
@@ -41,21 +41,15 @@ def _register_cli(app: Flask) -> None:
     def init_db() -> None:
         with app.app_context():
             db.create_all()
-        print("Database initialized.")
+            ensure_seed_data(db.session)
+            if app.config.get("AUTO_SEED_DEMO_PANTRY", False):
+                ensure_demo_pantry(db.session)
+        print("Database initialized and seed data loaded.")
 
-    @app.cli.command("run-weekly")
-    def run_weekly() -> None:
-        from .services.reporting import run_weekly_reports
-
+    @app.cli.command("seed-data")
+    def seed_data() -> None:
         with app.app_context():
-            summary = run_weekly_reports(
-                db.session,
-                output_root=Path(app.config["REPORT_OUTPUT_DIR"]),
-                send_email=True,
-                center_name=app.config["CENTER_NAME"],
-            )
-        print(summary)
-
-
-def _ensure_report_dir(app: Flask) -> None:
-    Path(app.config["REPORT_OUTPUT_DIR"]).mkdir(parents=True, exist_ok=True)
+            result = ensure_seed_data(db.session)
+            if app.config.get("AUTO_SEED_DEMO_PANTRY", False):
+                result.update(ensure_demo_pantry(db.session))
+        print(result)

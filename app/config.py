@@ -1,29 +1,37 @@
 import os
+from typing import Optional
 
 
-def _to_bool(value: str, default: bool = False) -> bool:
+def _to_bool(value: Optional[str], default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
+def _normalize_database_url(value: Optional[str]) -> str:
+    if not value:
+        return "sqlite:///meal_autopilot.db"
+
+    # Render/Heroku-style URLs may use postgres:// which SQLAlchemy 2 rejects.
+    if value.startswith("postgres://"):
+        return value.replace("postgres://", "postgresql://", 1)
+    return value
+
+
+def _normalize_usda_api_key(value: Optional[str]) -> str:
+    if value is None:
+        return "DEMO_KEY"
+    normalized = value.strip()
+    return normalized or "DEMO_KEY"
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///tutor_analytics.db")
+    SQLALCHEMY_DATABASE_URI = _normalize_database_url(os.getenv("DATABASE_URL"))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
-    REPORT_OUTPUT_DIR = os.getenv("REPORT_OUTPUT_DIR", "reports")
-    CENTER_NAME = os.getenv("CENTER_NAME", "Tutoring Center")
-
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    ENABLE_GPT_LABELING = _to_bool(os.getenv("ENABLE_GPT_LABELING"), default=True)
-
-    SMTP_HOST = os.getenv("SMTP_HOST")
-    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-    SMTP_USER = os.getenv("SMTP_USER")
-    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-    SMTP_FROM = os.getenv("SMTP_FROM", "noreply@example.com")
-    SMTP_TLS = _to_bool(os.getenv("SMTP_TLS"), default=True)
-
+    USDA_API_KEY = _normalize_usda_api_key(os.getenv("USDA_API_KEY"))
     AUTO_CREATE_TABLES = _to_bool(os.getenv("AUTO_CREATE_TABLES"), default=True)
+    AUTO_SEED_DATA = _to_bool(os.getenv("AUTO_SEED_DATA"), default=True)
+    AUTO_SEED_DEMO_PANTRY = _to_bool(os.getenv("AUTO_SEED_DEMO_PANTRY"), default=False)

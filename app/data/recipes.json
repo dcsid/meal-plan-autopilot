@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Lemon Chicken Rice Bowl",
+    "servings": 2,
+    "diet_tags": ["gluten-free", "high-protein", "halal"],
+    "main_protein": "chicken",
+    "ingredients": [
+      {"food": "chicken breast", "grams": 260},
+      {"food": "rice cooked", "grams": 260},
+      {"food": "broccoli", "grams": 180},
+      {"food": "olive oil", "grams": 10}
+    ]
+  },
+  {
+    "name": "Turkey Chili",
+    "servings": 2,
+    "diet_tags": ["gluten-free", "high-protein", "halal"],
+    "main_protein": "turkey",
+    "ingredients": [
+      {"food": "ground turkey", "grams": 260},
+      {"food": "black beans cooked", "grams": 220},
+      {"food": "tomato", "grams": 220},
+      {"food": "onion", "grams": 100},
+      {"food": "olive oil", "grams": 8}
+    ]
+  },
+  {
+    "name": "Tofu Noodle Stir Fry",
+    "servings": 2,
+    "diet_tags": ["vegetarian"],
+    "main_protein": "tofu",
+    "ingredients": [
+      {"food": "firm tofu", "grams": 280},
+      {"food": "rice noodles cooked", "grams": 260},
+      {"food": "broccoli", "grams": 160},
+      {"food": "bell pepper", "grams": 140},
+      {"food": "soy sauce", "grams": 24},
+      {"food": "sesame oil", "grams": 8}
+    ]
+  },
+  {
+    "name": "Salmon Quinoa Plate",
+    "servings": 2,
+    "diet_tags": ["gluten-free", "high-protein", "pescatarian"],
+    "main_protein": "salmon",
+    "ingredients": [
+      {"food": "salmon", "grams": 300},
+      {"food": "quinoa cooked", "grams": 240},
+      {"food": "spinach", "grams": 120},
+      {"food": "olive oil", "grams": 8}
+    ]
+  },
+  {
+    "name": "Chickpea Curry Rice",
+    "servings": 2,
+    "diet_tags": ["vegetarian", "vegan", "gluten-free"],
+    "main_protein": "chickpeas",
+    "ingredients": [
+      {"food": "chickpeas cooked", "grams": 320},
+      {"food": "tomato", "grams": 240},
+      {"food": "onion", "grams": 120},
+      {"food": "spinach", "grams": 140},
+      {"food": "rice cooked", "grams": 240},
+      {"food": "olive oil", "grams": 10}
+    ]
+  },
+  {
+    "name": "Beef Fajita Bowl",
+    "servings": 2,
+    "diet_tags": ["gluten-free", "high-protein", "halal"],
+    "main_protein": "beef",
+    "ingredients": [
+      {"food": "beef sirloin", "grams": 280},
+      {"food": "rice cooked", "grams": 240},
+      {"food": "bell pepper", "grams": 180},
+      {"food": "onion", "grams": 120},
+      {"food": "olive oil", "grams": 10}
+    ]
+  },
+  {
+    "name": "Chicken Yogurt Wrap",
+    "servings": 2,
+    "diet_tags": ["high-protein"],
+    "main_protein": "chicken",
+    "ingredients": [
+      {"food": "chicken breast", "grams": 240},
+      {"food": "whole wheat tortilla", "grams": 140},
+      {"food": "greek yogurt", "grams": 140},
+      {"food": "cucumber", "grams": 140},
+      {"food": "tomato", "grams": 140}
+    ]
+  },
+  {
+    "name": "Lentil Pasta Tofu Bake",
+    "servings": 2,
+    "diet_tags": ["vegetarian", "high-protein"],
+    "main_protein": "tofu",
+    "ingredients": [
+      {"food": "lentil pasta cooked", "grams": 300},
+      {"food": "firm tofu", "grams": 260},
+      {"food": "tomato sauce", "grams": 220},
+      {"food": "spinach", "grams": 120},
+      {"food": "olive oil", "grams": 8}
+    ]
+  },
+  {
+    "name": "Egg White Veggie Scramble",
+    "servings": 2,
+    "diet_tags": ["vegetarian", "gluten-free", "high-protein"],
+    "main_protein": "eggs",
+    "ingredients": [
+      {"food": "egg whites", "grams": 320},
+      {"food": "whole egg", "grams": 120},
+      {"food": "spinach", "grams": 100},
+      {"food": "potato roasted", "grams": 300},
+      {"food": "olive oil", "grams": 8}
+    ]
+  },
+  {
+    "name": "Shrimp Couscous Skillet",
+    "servings": 2,
+    "diet_tags": ["high-protein", "pescatarian"],
+    "main_protein": "shrimp",
+    "ingredients": [
+      {"food": "shrimp", "grams": 280},
+      {"food": "couscous cooked", "grams": 260},
+      {"food": "zucchini", "grams": 180},
+      {"food": "tomato", "grams": 160},
+      {"food": "olive oil", "grams": 8}
+    ]
+  }
+]

@@ -3,99 +3,148 @@ from datetime import datetime
 from .extensions import db
 
 
-class Student(db.Model):
-    __tablename__ = "students"
+class FoodItem(db.Model):
+    __tablename__ = "food_items"
 
     id = db.Column(db.Integer, primary_key=True)
-    external_id = db.Column(db.String(64), unique=True, nullable=False, index=True)
-    first_name = db.Column(db.String(64), nullable=True)
-    last_name = db.Column(db.String(64), nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    responses = db.relationship("Response", back_populates="student", cascade="all, delete-orphan")
-    parent_contacts = db.relationship(
-        "ParentContact", back_populates="student", cascade="all, delete-orphan"
-    )
-    email_logs = db.relationship("EmailLog", back_populates="student", cascade="all, delete-orphan")
-
-    @property
-    def display_name(self) -> str:
-        name = " ".join(part for part in [self.first_name, self.last_name] if part).strip()
-        if name:
-            return name
-        return f"Student {self.external_id}"
-
-
-class Test(db.Model):
-    __tablename__ = "tests"
-
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(64), unique=True, nullable=False, index=True)
-    name = db.Column(db.String(128), nullable=True)
-    taken_on = db.Column(db.Date, nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    questions = db.relationship("Question", back_populates="test", cascade="all, delete-orphan")
-
-
-class Question(db.Model):
-    __tablename__ = "questions"
-    __table_args__ = (db.UniqueConstraint("test_id", "question_number", name="uq_test_question"),)
-
-    id = db.Column(db.Integer, primary_key=True)
-    test_id = db.Column(db.Integer, db.ForeignKey("tests.id"), nullable=False, index=True)
-    question_number = db.Column(db.Integer, nullable=False)
-    text = db.Column(db.Text, nullable=True)
-    topic = db.Column(db.String(128), nullable=True, index=True)
-    difficulty = db.Column(db.Integer, nullable=True, index=True)  # 1-5
-    version = db.Column(db.String(32), nullable=True)
+    name = db.Column(db.String(128), nullable=False, unique=True, index=True)
+    fdc_id = db.Column(db.String(32), nullable=True, unique=True, index=True)
+    calories_per_100g = db.Column(db.Float, nullable=False, default=0.0)
+    protein_per_100g = db.Column(db.Float, nullable=False, default=0.0)
+    carbs_per_100g = db.Column(db.Float, nullable=False, default=0.0)
+    fat_per_100g = db.Column(db.Float, nullable=False, default=0.0)
+    source = db.Column(db.String(32), nullable=False, default="manual")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
     )
 
-    test = db.relationship("Test", back_populates="questions")
-    responses = db.relationship("Response", back_populates="question", cascade="all, delete-orphan")
+    pantry_items = db.relationship("PantryItem", back_populates="food", cascade="all, delete-orphan")
+    recipe_links = db.relationship("RecipeIngredient", back_populates="food", cascade="all, delete-orphan")
 
 
-class Response(db.Model):
-    __tablename__ = "responses"
-    __table_args__ = (db.UniqueConstraint("student_id", "question_id", name="uq_student_question"),)
+class PantryItem(db.Model):
+    __tablename__ = "pantry_items"
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("students.id"), nullable=False, index=True)
-    question_id = db.Column(db.Integer, db.ForeignKey("questions.id"), nullable=False, index=True)
-    is_correct = db.Column(db.Boolean, nullable=False)
+    food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False, index=True)
+    quantity_grams = db.Column(db.Float, nullable=False)
+    display_quantity = db.Column(db.Float, nullable=False)
+    display_unit = db.Column(db.String(16), nullable=False, default="g")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
 
-    student = db.relationship("Student", back_populates="responses")
-    question = db.relationship("Question", back_populates="responses")
+    food = db.relationship("FoodItem", back_populates="pantry_items")
 
 
-class ParentContact(db.Model):
-    __tablename__ = "parent_contacts"
-    __table_args__ = (db.UniqueConstraint("student_id", "email", name="uq_student_parent_email"),)
+class Recipe(db.Model):
+    __tablename__ = "recipes"
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("students.id"), nullable=False, index=True)
-    email = db.Column(db.String(255), nullable=False)
-    full_name = db.Column(db.String(128), nullable=True)
-    is_primary = db.Column(db.Boolean, nullable=False, default=True)
+    name = db.Column(db.String(160), nullable=False, unique=True)
+    servings = db.Column(db.Integer, nullable=False, default=1)
+    diet_tags_csv = db.Column(db.Text, nullable=False, default="")
+    main_protein = db.Column(db.String(64), nullable=True)
+    instructions = db.Column(db.Text, nullable=True)
+
+    calories_per_serving = db.Column(db.Float, nullable=False, default=0.0)
+    protein_per_serving = db.Column(db.Float, nullable=False, default=0.0)
+    carbs_per_serving = db.Column(db.Float, nullable=False, default=0.0)
+    fat_per_serving = db.Column(db.Float, nullable=False, default=0.0)
+
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
 
-    student = db.relationship("Student", back_populates="parent_contacts")
+    ingredients = db.relationship(
+        "RecipeIngredient",
+        back_populates="recipe",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+
+    @property
+    def diet_tags(self) -> list[str]:
+        return [tag.strip().lower() for tag in self.diet_tags_csv.split(",") if tag.strip()]
 
 
-class EmailLog(db.Model):
-    __tablename__ = "email_logs"
+class RecipeIngredient(db.Model):
+    __tablename__ = "recipe_ingredients"
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("students.id"), nullable=False, index=True)
-    recipient = db.Column(db.String(255), nullable=False)
-    subject = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(32), nullable=False)
-    error_message = db.Column(db.Text, nullable=True)
-    report_path = db.Column(db.Text, nullable=True)
-    sent_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False, index=True)
+    food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False, index=True)
+    grams = db.Column(db.Float, nullable=False)
 
-    student = db.relationship("Student", back_populates="email_logs")
+    recipe = db.relationship("Recipe", back_populates="ingredients")
+    food = db.relationship("FoodItem", back_populates="recipe_links")
+
+
+class UserPreferences(db.Model):
+    __tablename__ = "user_preferences"
+
+    id = db.Column(db.Integer, primary_key=True)
+    diet_tags_csv = db.Column(db.Text, nullable=False, default="")
+    allergens_csv = db.Column(db.Text, nullable=False, default="")
+    dislikes_csv = db.Column(db.Text, nullable=False, default="")
+
+    @property
+    def diet_tags(self) -> list[str]:
+        return _csv_to_list(self.diet_tags_csv)
+
+    @property
+    def allergens(self) -> list[str]:
+        return _csv_to_list(self.allergens_csv)
+
+    @property
+    def dislikes(self) -> list[str]:
+        return _csv_to_list(self.dislikes_csv)
+
+
+class MacroTarget(db.Model):
+    __tablename__ = "macro_targets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    calories = db.Column(db.Float, nullable=False, default=2000.0)
+    protein_min = db.Column(db.Float, nullable=False, default=120.0)
+    protein_max = db.Column(db.Float, nullable=False, default=160.0)
+    carbs_min = db.Column(db.Float, nullable=False, default=180.0)
+    carbs_max = db.Column(db.Float, nullable=False, default=260.0)
+    fat_min = db.Column(db.Float, nullable=False, default=50.0)
+    fat_max = db.Column(db.Float, nullable=False, default=80.0)
+
+    @property
+    def protein_target(self) -> float:
+        return (self.protein_min + self.protein_max) / 2.0
+
+    @property
+    def carbs_target(self) -> float:
+        return (self.carbs_min + self.carbs_max) / 2.0
+
+    @property
+    def fat_target(self) -> float:
+        return (self.fat_min + self.fat_max) / 2.0
+
+
+class GeneratedPlan(db.Model):
+    __tablename__ = "generated_plans"
+
+    id = db.Column(db.Integer, primary_key=True)
+    generated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    days = db.Column(db.Integer, nullable=False, default=7)
+
+
+def _csv_to_list(value: str) -> list[str]:
+    return [part.strip().lower() for part in value.split(",") if part.strip()]

@@ -1,59 +1,48 @@
 # Feature Mapping
 
-This file maps your requested modules to implementation files in this scaffold.
+This file maps Meal Plan Autopilot product features to implementation files.
 
-## 1) Scantron Data Import
+## Pantry CRUD
 
-- `app/services/ingestion.py`
-- API: `POST /api/upload/scantron` in `app/routes/uploads.py`
+- Model: `app/models.py` (`PantryItem`)
+- API: `app/routes/meal.py` (`GET/POST/PUT/DELETE /api/pantry`)
+- Unit conversion: `app/services/unit_conversion.py`
 
-## 2) Question Metadata Upload
+## Food Lookup + Caching
 
-- `app/services/ingestion.py` (`import_question_metadata_dataframe`)
-- API: `POST /api/upload/questions`
+- Service: `app/services/food_lookup.py`
+- API: `GET /api/foods/search`
+- Persistence cache: `FoodItem` rows in SQLite
 
-## 3) AI-Powered Question Labeling
+## Preferences + Constraints
 
-- `app/services/labeling.py`
-- API: `POST /api/questions/label-missing`
-- Supports custom taxonomy payload
+- Model: `app/models.py` (`UserPreferences`, `MacroTarget`)
+- API: `PUT /api/preferences`, `PUT /api/macro-target`
 
-## 4) Data Integration Engine
+## Recipe Dataset + Macro Precompute
 
-- Data joins are modeled via relational entities in `app/models.py`
-- Aggregation logic in `app/services/analytics.py`
+- Seed files: `app/data/foods.json`, `app/data/recipes.json`
+- Seed loader: `app/services/seed_data.py`
+- Macro computation: `app/services/macro_calculator.py`
 
-## 5) Analytics Engine
+## Decision Engine
 
-- Student analytics: `build_student_analytics`
-- Class analytics: `build_class_overview`
+- Filtering + scoring: `app/services/recipe_filter.py`
+- Weekly greedy planner + explanations: `app/services/meal_planner.py`
+- API: `POST /api/meal-plan/generate`
 
-## 6) Visualizations
+## Shopping List Builder
 
-- Chart generation in `app/services/reporting.py`
-- Report template embedding in `app/templates/report.html`
+- Service: `app/services/shopping_list.py`
+- Output included in meal-plan generation response
 
-## 7) Weekly Report Generator
+## Frontend
 
-- `generate_student_report` in `app/services/reporting.py`
-- API: `POST /api/reports/student/<student_id>`
+- Route: `app/routes/ui.py`
+- UI template: `app/templates/index.html`
 
-## 8) Parent Email Automation
+## Runtime + Bootstrapping
 
-- SMTP delivery + logging in `app/services/emailer.py`
-- Weekly send path in `run_weekly_reports`
-
-## 9) Admin Dashboard
-
-- `GET /admin` in `app/routes/admin.py`
-- `GET /api/admin/overview` for JSON analytics snapshot
-
-## 10) Automation Engine
-
-- CLI command: `flask --app run.py run-weekly`
-- Script: `scripts/weekly_job.py`
-
-## 11) Configurability & Reusability
-
-- Config flags in `app/config.py` + `.env.example`
-- Taxonomy override support in labeling endpoint payload
+- App factory + blueprints + CLI: `app/__init__.py`
+- Config: `app/config.py`
+- Entry point: `run.py`
