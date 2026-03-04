@@ -93,14 +93,3 @@ PYTHONPYCACHEPREFIX=/tmp/pycache pytest -q
 ```
 
 Current suite covers endpoint contracts, validation paths, planner behavior, lookup service behavior, seed idempotency, and UI route integrity.
-
-## Chrome Extension Prototype
-
-This repo also includes a standalone Chrome extension at `chrome-fact-checker/`:
-
-- deterministic, non-AI fact checker
-- weighted source confidence model
-- context categorization
-- full citation report page with decision trace
-
-Load it in Chrome via `chrome://extensions` -> **Load unpacked** -> select `chrome-fact-checker/`.
