@@ -11,9 +11,8 @@ It then produces an aggregated shopping list, surfaces explainable planning deci
 
 ## Live links
 
-- Live demo: `add-your-render-url-here`
-- Source code: `add-your-github-url-here`
-- Health check: `<your-render-url>/healthz`
+- Source code: https://github.com/dcsid/meal-plan-autopilot
+- Deployment: `render.yaml` in this repo provides a one-click Render Blueprint deploy (see [Deployment](#deployment-render))
 
 ## Why this project exists
 
@@ -179,7 +178,8 @@ Variety behavior:
 ## Local development
 
 ```bash
-cd "[redacted-path] project"
+git clone https://github.com/dcsid/meal-plan-autopilot.git
+cd meal-plan-autopilot
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
@@ -244,16 +244,3 @@ Current test suite validates:
 - Store and restaurant availability/menu information is inferred from public map data and may be incomplete.
 - Drug/supplement checks are informational and derived from labeling text; not medical advice.
 - SQLite in `/tmp` on free hosting is good for demoing, not durable production storage.
-
-## Recruiter/interviewer demo script (2-3 minutes)
-
-1. Open app and add pantry items from search.
-2. Set preferences and macro targets.
-3. Generate weekly plan and open Plan Studio.
-4. Show a manual swap and updated explanation.
-5. Open Smart Shopping and run recommendations.
-6. Open medication/supplement checks and point out informational disclaimers.
-
-## Resume-friendly summary
-
-Built a full-stack pantry-aware meal planning system (Flask + JS) that generates macro-constrained weekly plans with explainable scoring, integrates USDA/FDA/OSM data with caching and graceful fallbacks, and deploys as a public interview-ready web app.
